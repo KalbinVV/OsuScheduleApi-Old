@@ -120,8 +120,10 @@ class ParsingDataCollector(AbstractDataCollector):
 
                 if 'asd' in record_row.get('class'):
                     for sub_row in record_row.find_all('td'):
-                        class_name = sub_row.find('span')['title']
+                        if len(sub_row.text.strip()) == 0:
+                            continue
 
+                        class_name = sub_row.find('span')['title']
                         class_room = sub_row.find(class_='aud').text
                         teacher_name = sub_row.find(class_='p').text
 
@@ -136,10 +138,8 @@ class ParsingDataCollector(AbstractDataCollector):
                         schedule_dict[numeric_date_value].append(schedule_record)
                 else:
                     class_name = record_row.find('span')['title']
-
                     class_room = record_row.find(class_='aud').text
                     teacher_name = record_row.find(class_='p').text
-
                     record_id = record_row['pare_id']
 
                     schedule_record = ScheduleRecord(int(record_id),
