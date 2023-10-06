@@ -2,6 +2,40 @@
 
 Api для работы с расписанием ОГУ.
 
+## Установка:
+
+#### Скопировать репозиторий:
+
+git clone https://github.com/KalbinVV/OsuScheduleApi.git
+
+#### Перейти в каталог:
+
+cd OsuScheduleApi
+
+### Через Docker:
+
+#### Создать изображение:
+
+docker build . --tag osu_api:latest
+
+#### Развернуть контейнер:
+
+docker run -i -t -p 8000:8000 --name osu_api osu_api
+
+
+### Без установки Docker:
+Необходимо установить Python 3.11
+
+#### Установка необходимых библиотек:
+
+pip install -r requirements.txt
+
+pip install uvicorn
+
+#### Запуск сервера Uvicorn:
+
+uvicorn main:app
+
 ### Get методы:
 
 #### /departments_dict
