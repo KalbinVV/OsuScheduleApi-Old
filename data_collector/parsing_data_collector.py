@@ -23,7 +23,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
     @cachetools.func.ttl_cache(ttl=10 * 60)
     def get_departments_dict(self) -> dict[str, int]:
-        soup = BeautifulSoup(requests.get(self.MAIN_SCHEDULE_URL).text, 'lxml')
+        soup = BeautifulSoup(requests.get(self.MAIN_SCHEDULE_URL, verify=False).text, 'lxml')
 
         departments_options = self.__parse_options_container(soup, 'facult')
 
@@ -36,12 +36,14 @@ class ParsingDataCollector(AbstractDataCollector):
 
     @cachetools.func.ttl_cache(ttl=10 * 60)
     def get_departments_streams_dict(self, department_id: int) -> dict[str, int]:
-        request = requests.post(self.HANDLER_SCHEDULE_URL, data={'who': 1,
-                                                                 'what': 1,
-                                                                 'request': 'potok',
-                                                                 'filial': 1,
-                                                                 'mode': 'full',
-                                                                 'facult': department_id})
+        request = requests.post(self.HANDLER_SCHEDULE_URL,
+                                verify=False,
+                                data={'who': 1,
+                                      'what': 1,
+                                      'request': 'potok',
+                                      'filial': 1,
+                                      'mode': 'full',
+                                      'facult': department_id})
 
         html_text = request.text
 
@@ -58,13 +60,15 @@ class ParsingDataCollector(AbstractDataCollector):
 
     @cachetools.func.ttl_cache(ttl=10 * 60)
     def get_groups_dict(self, department_id: int, stream_id: int) -> dict[str, int]:
-        request = requests.post(self.HANDLER_SCHEDULE_URL, data={'who': 1,
-                                                                 'what': 1,
-                                                                 'request': 'group',
-                                                                 'filial': 1,
-                                                                 'mode': 'full',
-                                                                 'facult': department_id,
-                                                                 'potok': stream_id})
+        request = requests.post(self.HANDLER_SCHEDULE_URL,
+                                verify=False,
+                                data={'who': 1,
+                                      'what': 1,
+                                      'request': 'group',
+                                      'filial': 1,
+                                      'mode': 'full',
+                                      'facult': department_id,
+                                      'potok': stream_id})
 
         html_text = request.text
 
@@ -81,7 +85,8 @@ class ParsingDataCollector(AbstractDataCollector):
 
     @cachetools.func.ttl_cache(ttl=10 * 60)
     def get_schedule(self, group_id: int) -> dict[str, list[ScheduleRecord]]:
-        request = requests.get(f'http://www.osu.ru/pages/schedule/?who=1&what=1&filial=1&group={group_id}&mode=full')
+        request = requests.get(f'http://www.osu.ru/pages/schedule/?who=1&what=1&filial=1&group={group_id}&mode=full',
+                               verify=False)
 
         html_text = request.text
 

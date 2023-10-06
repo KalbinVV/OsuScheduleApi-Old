@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from fastapi import FastAPI
 
@@ -25,7 +26,49 @@ async def get_groups_dict(department_id: int, stream_id: int):
 
 
 @app.get("/schedule")
-async def get_schedule(group_id: int):
+async def get_all_schedule(group_id: int):
     return json.dumps(data_collector.get_schedule(group_id),
                       cls=ScheduleRecordEncoder,
                       ensure_ascii=False)
+
+
+@app.get('/schedule_today')
+async def get_today_schedule(group_id: int):
+    today = datetime.date.today()
+
+    formatted_date = today.strftime("%d.%m.%Y")
+
+    today_schedule = data_collector.get_schedule(group_id)[formatted_date]
+
+    return json.dumps(today_schedule, cls=ScheduleRecordEncoder, ensure_ascii=False)
+
+
+@app.get('/schedule_tomorrow')
+async def get_tomorrow_schedule(group_id: int):
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+
+    formatted_date = tomorrow.strftime("%d.%m.%Y")
+
+    schedule = data_collector.get_schedule(group_id)
+
+    tomorrow_schedule = schedule[formatted_date] if formatted_date in schedule else []
+
+    return json.dumps(tomorrow_schedule, cls=ScheduleRecordEncoder, ensure_ascii=False)
+
+
+@app.get('/schedule_week')
+async def get_week_schedule(group_id: int):
+    today = datetime.date.today()
+
+    days = [today + datetime.timedelta(days=i) for i in range(7)]
+
+    formatted_days = [day.strftime("%d.%m.%Y") for day in days]
+
+    schedule_dict = data_collector.get_schedule(group_id)
+
+    week_schedule_dict = dict()
+
+    for day in formatted_days:
+        week_schedule_dict[day] = schedule_dict[day] if day in schedule_dict else []
+
+    return json.dumps(week_schedule_dict, cls=ScheduleRecordEncoder, ensure_ascii=False)
