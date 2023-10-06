@@ -8,5 +8,4 @@ RUN pip install -r requirements.txt
 
 RUN pip install uvicorn
 
-ENTRYPOINT ["uvicorn", "main:app", "--reload"] 
-
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
