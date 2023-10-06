@@ -44,7 +44,9 @@ async def get_today_schedule(group_id: int):
 
     formatted_date = today.strftime("%d.%m.%Y")
 
-    today_schedule = data_collector.get_schedule(group_id)[formatted_date]
+    schedule = data_collector.get_schedule(group_id)
+
+    today_schedule = schedule[formatted_date] if formatted_date in schedule else []
 
     return json.dumps(today_schedule, cls=ScheduleRecordEncoder, ensure_ascii=False)
 
