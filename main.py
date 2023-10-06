@@ -72,3 +72,12 @@ async def get_week_schedule(group_id: int):
         week_schedule_dict[day] = schedule_dict[day] if day in schedule_dict else []
 
     return json.dumps(week_schedule_dict, cls=ScheduleRecordEncoder, ensure_ascii=False)
+
+
+@app.get('/schedule_at')
+async def get_schedule_at(group_id: int, date: str):
+    schedule = data_collector.get_schedule(group_id)
+
+    schedule_at_day = schedule[date] if date in schedule else []
+
+    return json.dumps(schedule_at_day, cls=ScheduleRecordEncoder, ensure_ascii=False)
