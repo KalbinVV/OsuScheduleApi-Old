@@ -34,7 +34,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return departments_dict
 
-    @cachetools.func.ttl_cache(ttl=10 * 60)
+    @cachetools.func.ttl_cache(ttl=60 * 60)
     def get_departments_streams_dict(self, department_id: int) -> dict[str, int]:
         request = requests.post(self.HANDLER_SCHEDULE_URL,
                                 verify=False,
@@ -58,7 +58,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return streams_dict
 
-    @cachetools.func.ttl_cache(ttl=10 * 60)
+    @cachetools.func.ttl_cache(ttl=60 * 60)
     def get_groups_dict(self, department_id: int, stream_id: int) -> dict[str, int]:
         request = requests.post(self.HANDLER_SCHEDULE_URL,
                                 verify=False,
@@ -83,7 +83,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return groups_dict
 
-    @cachetools.func.ttl_cache(ttl=10 * 60)
+    @cachetools.func.ttl_cache(ttl=15 * 60)
     def get_schedule(self, group_id: int) -> dict[str, list[ScheduleRecord]]:
         request = requests.get(f'http://www.osu.ru/pages/schedule/?who=1&what=1&filial=1&group={group_id}&mode=full',
                                verify=False)
@@ -108,7 +108,6 @@ class ParsingDataCollector(AbstractDataCollector):
                 continue
 
             numeric_date_value = date_match.group('numeric')
-            week_date_value = date_match.group('alphabetic')
 
             records_rows = schedule_row.find_all('td')[1:]
 
@@ -132,8 +131,7 @@ class ParsingDataCollector(AbstractDataCollector):
                         schedule_record = ScheduleRecord(int(record_id),
                                                          class_name,
                                                          class_room,
-                                                         teacher_name,
-                                                         week_date_value)
+                                                         teacher_name)
 
                         schedule_dict[numeric_date_value].append(schedule_record)
                 else:
@@ -145,8 +143,7 @@ class ParsingDataCollector(AbstractDataCollector):
                     schedule_record = ScheduleRecord(int(record_id),
                                                      class_name,
                                                      class_room,
-                                                     teacher_name,
-                                                     week_date_value)
+                                                     teacher_name)
 
                     schedule_dict[numeric_date_value].append(schedule_record)
 
