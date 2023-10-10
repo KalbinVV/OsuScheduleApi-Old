@@ -7,13 +7,8 @@ from fastapi.responses import RedirectResponse
 from classes.schedule_record_encoder import ScheduleRecordEncoder
 from data_collector.parsing_data_collector import ParsingDataCollector
 
-from UniversalCache.cache import Cache
-from UniversalCache.adapters.database_adapter import DatabaseAdapter
-
 app = FastAPI()
 data_collector = ParsingDataCollector()
-
-sqlite_cache = Cache(adapter=DatabaseAdapter(db_url='sqlite:///cache.db'))
 
 
 @app.get('/')
@@ -22,25 +17,21 @@ def redirect_to_docs():
 
 
 @app.get('/departments_dict')
-@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
 def get_departments_dict():
     return data_collector.get_departments_dict()
 
 
 @app.get('/departments_streams_dict')
-@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
 def get_departments_streams_dict(department_id: int):
     return data_collector.get_departments_streams_dict(department_id)
 
 
 @app.get('/groups_dict')
-@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
 def get_groups_dict(department_id: int, stream_id: int):
     return data_collector.get_groups_dict(department_id, stream_id)
 
 
 @app.get('/schedule')
-@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
 def get_all_schedule(group_id: int):
     return json.dumps(data_collector.get_schedule(group_id),
                       cls=ScheduleRecordEncoder,
@@ -48,7 +39,6 @@ def get_all_schedule(group_id: int):
 
 
 @app.get('/schedule_today')
-@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
 def get_today_schedule(group_id: int):
     today = datetime.date.today()
 
@@ -62,7 +52,6 @@ def get_today_schedule(group_id: int):
 
 
 @app.get('/schedule_tomorrow')
-@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
 def get_tomorrow_schedule(group_id: int):
     tomorrow = datetime.date.today() + datetime.timedelta(days=1)
 
@@ -95,7 +84,6 @@ def get_week_schedule(group_id: int):
 
 
 @app.get('/schedule_at')
-@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
 def get_schedule_at(group_id: int, date: str):
     schedule = data_collector.get_schedule(group_id)
 

@@ -6,7 +6,7 @@ from data_collector.abstract_data_collector import AbstractDataCollector
 
 import re
 
-from utils import get_text_from_element_or_default
+import cachetools.func
 
 
 class ParsingDataCollector(AbstractDataCollector):
@@ -21,6 +21,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return container.find_all('option')[1:]
 
+    @cachetools.func.ttl_cache(ttl=10 * 60)
     def get_departments_dict(self) -> dict[str, int]:
         soup = BeautifulSoup(requests.get(self.MAIN_SCHEDULE_URL, verify=False).text, 'lxml')
 
@@ -33,6 +34,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return departments_dict
 
+    @cachetools.func.ttl_cache(ttl=60 * 60)
     def get_departments_streams_dict(self, department_id: int) -> dict[str, int]:
         request = requests.post(self.HANDLER_SCHEDULE_URL,
                                 verify=False,
@@ -56,6 +58,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return streams_dict
 
+    @cachetools.func.ttl_cache(ttl=60 * 60)
     def get_groups_dict(self, department_id: int, stream_id: int) -> dict[str, int]:
         request = requests.post(self.HANDLER_SCHEDULE_URL,
                                 verify=False,
@@ -80,6 +83,7 @@ class ParsingDataCollector(AbstractDataCollector):
 
         return groups_dict
 
+    @cachetools.func.ttl_cache(ttl=15 * 60)
     def get_schedule(self, group_id: int) -> dict[str, list[ScheduleRecord]]:
         request = requests.get(f'http://www.osu.ru/pages/schedule/?who=1&what=1&filial=1&group={group_id}&mode=full',
                                verify=False)
@@ -119,38 +123,51 @@ class ParsingDataCollector(AbstractDataCollector):
                             continue
 
                         class_name = sub_row.find('span')['title']
-                        class_type = sub_row.find(class_='lestype').text
 
-                        class_room = get_text_from_element_or_default(sub_row.find(class_='aud'),
-                                                                      'Аудитория не указана')
-                        teacher_name = get_text_from_element_or_default(sub_row.find(class_='p'),
-                                                                        'Преподаватель не указан')
+                        class_room_p = sub_row.find(class_='aud')
+
+                        if class_room_p is not None:
+                            class_room = record_row.find(class_='aud').text
+                        else:
+                            class_room = 'Аудитория не указана'
+
+                        teacher_name_p = sub_row.find(class_='p')
+
+                        if teacher_name_p is not None:
+                            teacher_name = teacher_name_p.text
+                        else:
+                            teacher_name = ''
 
                         record_id = sub_row['pare_id']
 
                         schedule_record = ScheduleRecord(int(record_id),
                                                          class_name,
                                                          class_room,
-                                                         class_type,
                                                          teacher_name)
 
                         schedule_dict[numeric_date_value].append(schedule_record)
                 else:
                     class_name = record_row.find('span')['title']
 
-                    class_room = get_text_from_element_or_default(record_row.find(class_='aud'),
-                                                                  'Аудитория не указана')
-                    class_type = get_text_from_element_or_default(record_row.find(class_='lestype'),
-                                                                  'Не указано')
+                    class_room_p = record_row.find(class_='aud')
 
-                    teacher_name = get_text_from_element_or_default(record_row.find(class_='p'),
-                                                                    'Преподаватель не указан')
+                    if class_room_p is not None:
+                        class_room = record_row.find(class_='aud').text
+                    else:
+                        class_room = 'Аудитория не указана'
+
+                    teacher_name_p = record_row.find(class_='p')
+
+                    if teacher_name_p is not None:
+                        teacher_name = teacher_name_p.text
+                    else:
+                        teacher_name = ''
+
                     record_id = record_row['pare_id']
 
                     schedule_record = ScheduleRecord(int(record_id),
                                                      class_name,
                                                      class_room,
-                                                     class_type,
                                                      teacher_name)
 
                     schedule_dict[numeric_date_value].append(schedule_record)
