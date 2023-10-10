@@ -124,7 +124,13 @@ class ParsingDataCollector(AbstractDataCollector):
 
                         class_name = sub_row.find('span')['title']
                         class_room = sub_row.find(class_='aud').text
-                        teacher_name = sub_row.find(class_='p').text
+
+                        teacher_name_p = sub_row.find(class_='p')
+
+                        if teacher_name_p is not None:
+                            teacher_name = teacher_name_p.text
+                        else:
+                            teacher_name = ''
 
                         record_id = sub_row['pare_id']
 
@@ -137,7 +143,14 @@ class ParsingDataCollector(AbstractDataCollector):
                 else:
                     class_name = record_row.find('span')['title']
                     class_room = record_row.find(class_='aud').text
-                    teacher_name = record_row.find(class_='p').text
+
+                    teacher_name_p = record_row.find(class_='p')
+
+                    if teacher_name_p is not None:
+                        teacher_name = teacher_name_p.text
+                    else:
+                        teacher_name = ''
+
                     record_id = record_row['pare_id']
 
                     schedule_record = ScheduleRecord(int(record_id),
