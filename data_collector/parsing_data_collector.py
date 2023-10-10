@@ -123,7 +123,13 @@ class ParsingDataCollector(AbstractDataCollector):
                             continue
 
                         class_name = sub_row.find('span')['title']
-                        class_room = sub_row.find(class_='aud').text
+
+                        class_room_p = sub_row.find(class_='aud')
+
+                        if class_room_p is not None:
+                            class_room = record_row.find(class_='aud').text
+                        else:
+                            class_room = 'Аудитория не указана'
 
                         teacher_name_p = sub_row.find(class_='p')
 
@@ -142,7 +148,13 @@ class ParsingDataCollector(AbstractDataCollector):
                         schedule_dict[numeric_date_value].append(schedule_record)
                 else:
                     class_name = record_row.find('span')['title']
-                    class_room = record_row.find(class_='aud').text
+
+                    class_room_p = record_row.find(class_='aud')
+
+                    if class_room_p is not None:
+                        class_room = record_row.find(class_='aud').text
+                    else:
+                        class_room = 'Аудитория не указана'
 
                     teacher_name_p = record_row.find(class_='p')
 
