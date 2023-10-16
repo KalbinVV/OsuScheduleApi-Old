@@ -7,40 +7,49 @@ from fastapi.responses import RedirectResponse
 from classes.schedule_record_encoder import ScheduleRecordEncoder
 from data_collector.parsing_data_collector import ParsingDataCollector
 
+from UniversalCache.cache import Cache
+from UniversalCache.adapters.database_adapter import DatabaseAdapter
 
 app = FastAPI()
 data_collector = ParsingDataCollector()
 
+sqlite_cache = Cache(adapter=DatabaseAdapter(db_url='sqlite:///cache.db'))
+
 
 @app.get('/')
-async def redirect_to_docs():
+def redirect_to_docs():
     return RedirectResponse("/docs")
 
 
 @app.get('/departments_dict')
-async def get_departments_dict():
+@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
+def get_departments_dict():
     return data_collector.get_departments_dict()
 
 
 @app.get('/departments_streams_dict')
-async def get_departments_streams_dict(department_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
+def get_departments_streams_dict(department_id: int):
     return data_collector.get_departments_streams_dict(department_id)
 
 
 @app.get('/groups_dict')
-async def get_groups_dict(department_id: int, stream_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(days=1))
+def get_groups_dict(department_id: int, stream_id: int):
     return data_collector.get_groups_dict(department_id, stream_id)
 
 
 @app.get('/schedule')
-async def get_all_schedule(group_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
+def get_all_schedule(group_id: int):
     return json.dumps(data_collector.get_schedule(group_id),
                       cls=ScheduleRecordEncoder,
                       ensure_ascii=False)
 
 
 @app.get('/schedule_today')
-async def get_today_schedule(group_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
+def get_today_schedule(group_id: int):
     today = datetime.date.today()
 
     formatted_date = today.strftime("%d.%m.%Y")
@@ -53,7 +62,8 @@ async def get_today_schedule(group_id: int):
 
 
 @app.get('/schedule_tomorrow')
-async def get_tomorrow_schedule(group_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
+def get_tomorrow_schedule(group_id: int):
     tomorrow = datetime.date.today() + datetime.timedelta(days=1)
 
     formatted_date = tomorrow.strftime("%d.%m.%Y")
@@ -66,7 +76,8 @@ async def get_tomorrow_schedule(group_id: int):
 
 
 @app.get('/schedule_week')
-async def get_week_schedule(group_id: int):
+@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
+def get_week_schedule(group_id: int):
     today = datetime.date.today()
 
     days = [today + datetime.timedelta(days=i) for i in range(7)]
@@ -84,7 +95,8 @@ async def get_week_schedule(group_id: int):
 
 
 @app.get('/schedule_at')
-async def get_schedule_at(group_id: int, date: str):
+@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
+def get_schedule_at(group_id: int, date: str):
     schedule = data_collector.get_schedule(group_id)
 
     schedule_at_day = schedule[date] if date in schedule else []
