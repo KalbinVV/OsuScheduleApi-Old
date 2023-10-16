@@ -32,6 +32,8 @@ pip install -r requirements.txt
 
 pip install uvicorn
 
+pip install dependencies/UniversalCache-0.0.1.tar.gz
+
 #### Запуск сервера Uvicorn:
 
 uvicorn main:app
@@ -112,3 +114,5 @@ cachetools~=5.3.1
 beautifulsoup4~=4.12.2
 
 lxml~=4.9.3
+
+UniversalCache~=0.0.1 (https://github.com/KalbinVV/UniversalCache)
