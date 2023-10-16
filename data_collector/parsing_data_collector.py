@@ -119,6 +119,7 @@ class ParsingDataCollector(AbstractDataCollector):
                             continue
 
                         class_name = sub_row.find('span')['title']
+                        class_type = sub_row.find(class_='lestype').text
 
                         class_room = get_text_from_element_or_default(sub_row.find(class_='aud'),
                                                                       'Аудитория не указана')
@@ -130,6 +131,7 @@ class ParsingDataCollector(AbstractDataCollector):
                         schedule_record = ScheduleRecord(int(record_id),
                                                          class_name,
                                                          class_room,
+                                                         class_type,
                                                          teacher_name)
 
                         schedule_dict[numeric_date_value].append(schedule_record)
@@ -138,6 +140,9 @@ class ParsingDataCollector(AbstractDataCollector):
 
                     class_room = get_text_from_element_or_default(record_row.find(class_='aud'),
                                                                   'Аудитория не указана')
+                    class_type = get_text_from_element_or_default(record_row.find(class_='lestype'),
+                                                                  'Не указано')
+
                     teacher_name = get_text_from_element_or_default(record_row.find(class_='p'),
                                                                     'Преподаватель не указан')
                     record_id = record_row['pare_id']
@@ -145,6 +150,7 @@ class ParsingDataCollector(AbstractDataCollector):
                     schedule_record = ScheduleRecord(int(record_id),
                                                      class_name,
                                                      class_room,
+                                                     class_type,
                                                      teacher_name)
 
                     schedule_dict[numeric_date_value].append(schedule_record)
