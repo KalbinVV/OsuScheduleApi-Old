@@ -65,7 +65,6 @@ def get_tomorrow_schedule(group_id: int):
 
 
 @app.get('/schedule_week')
-@sqlite_cache.cache(ttl=datetime.timedelta(hours=1))
 def get_week_schedule(group_id: int):
     today = datetime.date.today()
 
